@@ -1,0 +1,8 @@
+analyzer:
+  sql:
+    normalize_whitespace: true
+    normalize_case: upper
+    strip_comments: true
+  table_mapping:
+    custom_rules: []
+    exception_rules: []

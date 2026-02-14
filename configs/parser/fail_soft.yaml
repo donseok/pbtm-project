@@ -1,0 +1,5 @@
+parser:
+  fail_soft: true
+  continue_on_syntax_error: true
+  record_error_position: true
+  max_errors_per_file: 100

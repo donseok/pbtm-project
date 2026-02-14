@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.coverage
+
+# Virtual environments
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Runtime outputs
+workspace/extracted/**
+workspace/runs/**
+workspace/reports/**
+workspace/archive/**
+!workspace/**/.gitkeep
+
+# Local databases
+*.sqlite
+*.db
+
+# OS
+.DS_Store

@@ -1,0 +1,12 @@
+rule_registry:
+  versioning: semver
+  mandatory_fields:
+    - rule_id
+    - version
+    - owner
+    - scope
+    - risk
+    - regression_result
+  approval:
+    required_reviewers: 1
+    require_regression_pass: true

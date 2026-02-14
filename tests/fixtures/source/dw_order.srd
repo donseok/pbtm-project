@@ -1,0 +1,3 @@
+SELECT o.order_id, o.status
+FROM tb_order o
+JOIN tb_customer c ON c.customer_id = o.customer_id
