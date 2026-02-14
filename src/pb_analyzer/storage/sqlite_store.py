@@ -142,6 +142,27 @@ def persist_analysis(db_path: Path, run_context: RunContext, analysis: AnalysisR
                 )
                 sql_tables_count += 1
 
+        data_windows_count = 0
+        for dw_item in analysis.data_windows:
+            dw_object_id = object_name_to_id.get(dw_item.object_name.lower())
+            if dw_object_id is None:
+                continue
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO data_windows
+                    (run_id, object_id, dw_name, base_table, sql_select)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    run_context.run_id,
+                    dw_object_id,
+                    dw_item.dw_name,
+                    dw_item.base_table,
+                    dw_item.sql_select,
+                ),
+            )
+            data_windows_count += 1
+
         conn.commit()
 
     return PersistResult(
@@ -151,6 +172,7 @@ def persist_analysis(db_path: Path, run_context: RunContext, analysis: AnalysisR
         relations_count=relations_count,
         sql_statements_count=sql_statements_count,
         sql_tables_count=sql_tables_count,
+        data_windows_count=data_windows_count,
     )
 
 

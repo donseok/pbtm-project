@@ -42,11 +42,34 @@ pb-analyzer run-all \
 3. 실패 객체 목록 확인 후 재시도
 4. 동일 오류 3회 반복 시 규칙/파서 이슈로 분류하여 티켓화
 
-## 6. 변경 관리
+## 6. 실행 비교 (diff)
+```bash
+# 두 분석 실행 결과를 비교
+pb-analyzer diff --db ./workspace/job1.db --run-old <이전_run_id> --run-new <최신_run_id>
+```
+- 비교 대상: 객체, 관계, SQL문, DataWindow
+- 출력: 추가/삭제된 항목 목록과 요약 카운트
+- 활용: 소스 변경 전후 영향 분석, 리팩토링 검증
+
+## 7. 골든셋 회귀 테스트
+```bash
+# 메트릭 생성
+python tools/ci/generate_golden_metrics.py \
+    --db workspace/runs/latest.db \
+    --golden tests/regression/golden_set/expected.json \
+    --output workspace/reports/latest/metrics.json
+
+# 기준 확인
+python tools/ci/check_golden_metrics.py --precision-min 0.85 --recall-min 0.75
+```
+- 골든셋 정의: `tests/regression/golden_set/expected.json`
+- 목표: precision >= 0.85, recall >= 0.75
+
+## 8. 변경 관리
 - 규칙 변경 시 `src/pb_analyzer/rules/RULE_REGISTRY.md` 업데이트
 - 골든셋 회귀 통과 전 운영 반영 금지
 
-## 7. 웹 대시보드
+## 9. 웹 대시보드
 ```bash
 # 기본 실행
 pb-analyzer dashboard --db ./workspace/job1.db

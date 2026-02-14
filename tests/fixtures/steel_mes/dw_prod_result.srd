@@ -1,0 +1,17 @@
+release 12;
+datawindow(units=0 timer_interval=0 color=536870912 processing=0)
+table(column=(type=char(20) updatewhereclause=yes name=lot_no dbname="tb_prod_result.lot_no")
+  column=(type=char(10) updatewhereclause=yes name=plant_cd dbname="tb_prod_result.plant_cd")
+  column=(type=char(20) updatewhereclause=yes name=prod_cd dbname="tb_prod_result.prod_cd")
+  column=(type=char(10) updatewhereclause=yes name=line_cd dbname="tb_prod_result.line_cd")
+  column=(type=decimal(2) updatewhereclause=yes name=prod_qty dbname="tb_prod_result.prod_qty")
+  column=(type=decimal(3) updatewhereclause=yes name=prod_weight dbname="tb_prod_result.prod_weight")
+  column=(type=char(4) updatewhereclause=yes name=shift_cd dbname="tb_prod_result.shift_cd")
+  column=(type=char(10) updatewhereclause=yes name=worker_id dbname="tb_prod_result.worker_id")
+  column=(type=char(10) updatewhereclause=yes name=status dbname="tb_prod_result.status")
+  column=(type=datetime updatewhereclause=yes name=prod_dt dbname="tb_prod_result.prod_dt")
+  column=(type=char(50) name=prod_nm dbname="tp.prod_nm")
+  column=(type=char(20) name=grade_cd dbname="tp.grade_cd")
+  retrieve="SELECT pr.lot_no, pr.plant_cd, pr.prod_cd, tp.prod_nm, tp.grade_cd, pr.line_cd, pr.prod_qty, pr.prod_weight, pr.shift_cd, pr.worker_id, pr.status, pr.prod_dt FROM tb_prod_result pr JOIN tb_product tp ON tp.prod_cd = pr.prod_cd WHERE pr.plant_cd = :al_plant_cd AND pr.prod_dt = :ad_prod_dt ORDER BY pr.lot_no"
+  update="tb_prod_result"
+)

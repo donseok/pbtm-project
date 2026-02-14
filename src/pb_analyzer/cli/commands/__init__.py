@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from types import ModuleType
 
-from pb_analyzer.cli.commands import analyze, dashboard, extract, report, run_all
+from pb_analyzer.cli.commands import analyze, dashboard, diff, extract, report, run_all
 
-COMMAND_MODULES: list[ModuleType] = [extract, analyze, report, run_all, dashboard]
+COMMAND_MODULES: list[ModuleType] = [extract, analyze, report, run_all, dashboard, diff]
 
 __all__ = ["COMMAND_MODULES"]

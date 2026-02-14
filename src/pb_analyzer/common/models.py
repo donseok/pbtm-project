@@ -64,6 +64,13 @@ class ParseIssue:
 
 
 @dataclass(frozen=True)
+class ParsedDataWindow:
+    dw_name: str
+    base_table: str | None
+    sql_select: str | None
+
+
+@dataclass(frozen=True)
 class ParsedObject:
     object_type: str
     name: str
@@ -73,6 +80,7 @@ class ParsedObject:
     script_text: str
     events: tuple[ParsedEvent, ...]
     functions: tuple[ParsedFunction, ...]
+    data_windows: tuple[ParsedDataWindow, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -126,12 +134,21 @@ class SqlStatementRecord:
 
 
 @dataclass(frozen=True)
+class DataWindowRecord:
+    object_name: str
+    dw_name: str
+    base_table: str | None = None
+    sql_select: str | None = None
+
+
+@dataclass(frozen=True)
 class AnalysisResult:
     objects: tuple[ObjectRecord, ...]
     events: tuple[EventRecord, ...]
     functions: tuple[FunctionRecord, ...]
     relations: tuple[RelationRecord, ...]
     sql_statements: tuple[SqlStatementRecord, ...]
+    data_windows: tuple[DataWindowRecord, ...] = ()
     warnings: tuple[str, ...] = ()
 
 
@@ -152,6 +169,7 @@ class PersistResult:
     relations_count: int
     sql_statements_count: int
     sql_tables_count: int
+    data_windows_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -169,6 +187,33 @@ class AnalyzeOutcome:
 @dataclass(frozen=True)
 class ReportOutcome:
     generated_files: tuple[Path, ...]
+
+
+@dataclass(frozen=True)
+class DiffItem:
+    category: str
+    name: str
+    change_type: Literal["added", "removed", "changed"]
+    detail: str = ""
+
+
+@dataclass(frozen=True)
+class DiffResult:
+    run_id_old: str
+    run_id_new: str
+    items: tuple[DiffItem, ...]
+
+    @property
+    def added_count(self) -> int:
+        return sum(1 for item in self.items if item.change_type == "added")
+
+    @property
+    def removed_count(self) -> int:
+        return sum(1 for item in self.items if item.change_type == "removed")
+
+    @property
+    def changed_count(self) -> int:
+        return sum(1 for item in self.items if item.change_type == "changed")
 
 
 @dataclass

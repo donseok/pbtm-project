@@ -831,287 +831,575 @@ def _parse_filters(params: dict[str, list[str]]) -> DashboardFilters:
 
 def _render_dashboard_html() -> str:
     html = """<!doctype html>
-<html lang=\"ko\">
+<html lang="ko">
 <head>
-  <meta charset=\"utf-8\" />
-  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>__TITLE__</title>
   <style>
     :root {
-      --bg: #f7fafc;
+      --bg: #f8fafc;
       --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --accent: #0f766e;
-      --accent-soft: #ccfbf1;
-      --call: #0ea5e9;
-      --open: #f59e0b;
+      --surface-hover: #f1f5f9;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --muted: #94a3b8;
+      --border: #e2e8f0;
+      --accent: #0d9488;
+      --accent-light: #ccfbf1;
+      --accent-dark: #115e59;
+      --accent-hover: #0f766e;
+      --calls: #3b82f6;
+      --calls-light: #dbeafe;
+      --opens: #f59e0b;
+      --opens-light: #fef3c7;
+      --read: #22c55e;
+      --read-light: #dcfce7;
+      --write: #ef4444;
+      --write-light: #fee2e2;
+      --uses-dw: #8b5cf6;
+      --uses-dw-light: #ede9fe;
+      --triggers: #ec4899;
+      --triggers-light: #fce7f3;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --transition: 0.2s ease;
     }
+    *, *::before, *::after { box-sizing: border-box; }
     body {
-      margin: 0;
-      background: radial-gradient(circle at 20% 0%, #e6fffa, transparent 35%), var(--bg);
-      color: var(--text);
-      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Pretendard","Noto Sans KR",-apple-system,sans-serif;
+      font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
     }
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+
+    /* Header */
     .header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 16px;
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 12px; margin-bottom: 16px;
     }
-    h1 { margin: 0; font-size: 28px; }
-    .sub { color: var(--muted); margin-top: 4px; font-size: 14px; }
-    .controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
+    .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
+    .header .sub { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+    .header-controls {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
     }
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 10px;
+    .header-controls label {
+      font-size: 12px; color: var(--text-secondary); font-weight: 500;
     }
-    .filter-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--muted);
+
+    /* Form Elements */
+    select, input[type="text"], input[type="number"] {
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 6px 10px; font-size: 13px; background: var(--surface);
+      color: var(--text); transition: border-color var(--transition); outline: none;
     }
-    select, input, button {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 14px;
-      background: #fff;
-      color: var(--text);
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
     }
     button {
-      cursor: pointer;
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      border: 1px solid var(--accent); border-radius: var(--radius-xs);
+      padding: 6px 14px; font-size: 13px; font-weight: 500;
+      background: var(--accent); color: #fff; cursor: pointer;
+      transition: all var(--transition);
     }
+    button:hover { background: var(--accent-hover); }
     .btn-subtle {
-      background: #fff;
-      color: var(--text);
-      border-color: var(--line);
+      background: var(--surface); color: var(--text-secondary);
+      border-color: var(--border);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
+    .btn-subtle:hover { background: var(--surface-hover); }
+    .btn-icon {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-secondary); padding: 6px 10px;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    .btn-icon:hover { background: var(--surface-hover); color: var(--text); }
+
+    /* Filter Bar */
+    .filter-bar {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
     }
-    .card .label { color: var(--muted); font-size: 12px; }
-    .card .value { font-size: 22px; font-weight: 700; margin-top: 6px; }
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
+    .filter-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; cursor: pointer; user-select: none;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
     }
-    @media (max-width: 960px) {
-      .two-col { grid-template-columns: 1fr; }
+    .filter-toggle:hover { background: var(--surface-hover); }
+    .filter-toggle .arrow {
+      transition: transform var(--transition); font-size: 10px;
     }
+    .filter-toggle .arrow.open { transform: rotate(180deg); }
+    .filter-content { display: none; padding: 0 16px 14px; }
+    .filter-content.open { display: block; }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px; align-items: end;
+    }
+    .filter-item { display: flex; flex-direction: column; gap: 4px; }
+    .filter-item label {
+      font-size: 11px; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .filter-actions { display: flex; gap: 6px; align-items: flex-end; }
+    .active-filters {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px;
+    }
+    .active-filters:empty { display: none; padding: 0; }
+    .filter-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent-light); color: var(--accent-dark);
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500;
+    }
+    .filter-tag .remove { cursor: pointer; font-weight: 700; opacity: 0.6; }
+    .filter-tag .remove:hover { opacity: 1; }
+
+    /* Tab Navigation */
+    .tab-bar {
+      display: flex; gap: 0; border-bottom: 2px solid var(--border);
+      margin-bottom: 20px; overflow-x: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      position: relative; padding: 10px 20px; font-size: 14px;
+      font-weight: 500; color: var(--muted); background: none;
+      border: none; cursor: pointer; white-space: nowrap;
+      transition: color var(--transition);
+    }
+    .tab-btn:hover { color: var(--text-secondary); }
+    .tab-btn.active { color: var(--accent); font-weight: 600; }
+    .tab-btn.active::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 2px; background: var(--accent); border-radius: 1px 1px 0 0;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Status */
+    #status {
+      color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;
+      padding: 6px 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+    }
+
+    /* Metric Cards */
+    .metric-grid {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 12px; margin-bottom: 20px;
+    }
+    @media (max-width: 1200px) { .metric-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
+    .metric-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 4px solid var(--accent); border-radius: var(--radius-sm);
+      padding: 16px; transition: all var(--transition); cursor: default;
+    }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .metric-card .metric-label {
+      font-size: 11px; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .metric-card .metric-value {
+      font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.2;
+    }
+    .metric-card .metric-sub {
+      font-size: 11px; color: var(--text-secondary); margin-top: 2px;
+    }
+    .metric-card.blue { border-left-color: var(--calls); }
+    .metric-card.amber { border-left-color: var(--opens); }
+    .metric-card.green { border-left-color: var(--read); }
+    .metric-card.red { border-left-color: var(--write); }
+    .metric-card.violet { border-left-color: var(--uses-dw); }
+    .metric-card.gray { border-left-color: var(--muted); }
+
+    /* Panels */
     .panel {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
     }
-    .panel h2 { margin: 0 0 10px 0; font-size: 16px; }
-    .table-wrap { overflow: auto; max-height: 360px; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
     }
-    th, td {
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      padding: 7px;
+    .panel-title { font-size: 15px; font-weight: 600; color: var(--text); margin: 0; }
+    .panel-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* Layout */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    @media (max-width: 960px) { .two-col { grid-template-columns: 1fr; } }
+    .three-col {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    @media (max-width: 960px) { .three-col { grid-template-columns: 1fr; } }
+
+    /* Horizontal Bar Chart */
+    .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label {
+      width: 110px; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); text-align: right; flex-shrink: 0;
+    }
+    .bar-track {
+      flex: 1; height: 22px; background: var(--surface-hover);
+      border-radius: 4px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.6s ease; min-width: 2px;
+    }
+    .bar-fill.calls { background: var(--calls); }
+    .bar-fill.opens { background: var(--opens); }
+    .bar-fill.uses_dw { background: var(--uses-dw); }
+    .bar-fill.reads_table { background: var(--read); }
+    .bar-fill.writes_table { background: var(--write); }
+    .bar-fill.triggers_event { background: var(--triggers); }
+    .bar-count {
+      width: 50px; font-size: 12px; font-weight: 600;
+      color: var(--text); flex-shrink: 0;
+    }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; max-height: 450px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f8fafc; position: sticky; top: 0; z-index: 1;
+      border-bottom: 2px solid var(--border); text-align: left;
+      padding: 8px 10px; font-weight: 600; font-size: 12px;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: 0.3px; cursor: pointer; user-select: none;
       white-space: nowrap;
     }
-    th { background: #f9fafb; position: sticky; top: 0; }
-    .pill {
-      display: inline-block;
-      background: var(--accent-soft);
-      color: #134e4a;
-      border-radius: 999px;
-      padding: 3px 8px;
-      font-size: 12px;
-      margin-right: 4px;
-      margin-bottom: 4px;
+    thead th:hover { background: var(--surface-hover); }
+    thead th .sort-icon { margin-left: 4px; font-size: 10px; opacity: 0.4; }
+    thead th.sorted .sort-icon { opacity: 1; color: var(--accent); }
+    tbody td {
+      border-bottom: 1px solid var(--border); padding: 7px 10px;
+      white-space: nowrap;
     }
-    #status { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-    .legend {
-      display: flex;
-      gap: 14px;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      flex-wrap: wrap;
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    tbody tr:hover { background: #f0f9ff; }
+
+    /* Badges */
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
     }
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    .badge-calls { background: var(--calls-light); color: #1d4ed8; }
+    .badge-opens { background: var(--opens-light); color: #b45309; }
+    .badge-uses_dw { background: var(--uses-dw-light); color: #6d28d9; }
+    .badge-reads_table, .badge-read { background: var(--read-light); color: #15803d; }
+    .badge-writes_table, .badge-write { background: var(--write-light); color: #b91c1c; }
+    .badge-triggers_event { background: var(--triggers-light); color: #be185d; }
+    .badge-type { background: var(--accent-light); color: var(--accent-dark); }
+    .badge-count {
+      background: var(--surface-hover); color: var(--text);
+      font-size: 12px; padding: 3px 10px; border: 1px solid var(--border);
+    }
+
+    /* Clickable & Mono */
+    .clickable {
+      color: var(--accent); cursor: pointer;
+      font-family: "Cascadia Code","Fira Code",monospace; font-size: 12px;
+    }
+    .clickable:hover { text-decoration: underline; }
+    .mono { font-family: "Cascadia Code","Fira Code",monospace; font-size: 12px; }
+
+    /* Graph */
+    .graph-container {
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: #fcfeff; overflow: hidden; position: relative;
+    }
+    .graph-container svg { width: 100%; display: block; }
+    .graph-container.mini svg { height: 280px; }
+    .graph-container.full svg { height: 550px; }
+    @media (max-width: 960px) { .graph-container.full svg { height: 450px; } }
+    @media (max-width: 640px) {
+      .graph-container.mini svg { height: 200px; }
+      .graph-container.full svg { height: 300px; }
+    }
+    .graph-legend {
+      display: flex; gap: 16px; font-size: 12px;
+      color: var(--text-secondary); margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .graph-legend .legend-item {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; display: inline-block;
     }
     .legend-line {
-      width: 20px;
-      height: 3px;
-      border-radius: 2px;
-      display: inline-block;
+      width: 20px; height: 3px; border-radius: 2px; display: inline-block;
     }
-    .legend-line.calls { background: var(--call); }
-    .legend-line.opens { background: var(--open); }
-    #graphSvg {
-      width: 100%;
-      height: 460px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fcfeff;
+    .graph-tooltip {
+      position: absolute; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 8px 12px; font-size: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
+      pointer-events: none; opacity: 0; transition: opacity 0.15s;
+      z-index: 100; max-width: 250px;
+    }
+    .graph-tooltip.visible { opacity: 1; }
+
+    /* Toggle Group */
+    .toggle-group {
+      display: inline-flex; border: 1px solid var(--border);
+      border-radius: var(--radius-xs); overflow: hidden;
+    }
+    .toggle-btn {
+      padding: 5px 12px; font-size: 12px; font-weight: 500;
+      border: none; border-right: 1px solid var(--border);
+      background: var(--surface); color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .toggle-btn:last-child { border-right: none; }
+    .toggle-btn:hover { background: var(--surface-hover); }
+    .toggle-btn.active { background: var(--accent); color: #fff; }
+
+    /* Run Info */
+    .run-info {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px 20px; font-size: 13px;
+    }
+    .run-info dt {
+      color: var(--muted); font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .run-info dd { margin: 0 0 8px 0; font-weight: 500; color: var(--text); }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+    .empty-state .msg { font-size: 14px; }
+
+    /* Type Distribution */
+    .type-dist { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      font-size: 13px; font-weight: 500; cursor: default;
+      transition: all var(--transition);
+    }
+    .type-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .type-chip .count {
+      background: var(--accent-light); color: var(--accent-dark);
+      padding: 1px 6px; border-radius: 999px; font-size: 12px; font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <div class=\"container\">
-    <div class=\"header\">
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
       <div>
         <h1>__TITLE__</h1>
-        <div class=\"sub\">IR DB 기반 영향분석 조회</div>
+        <div class="sub">IR DB 기반 영향분석 조회</div>
       </div>
-      <div class=\"controls\">
-        <label for=\"runSelect\">run_id</label>
-        <select id=\"runSelect\"></select>
-        <label for=\"limitInput\">limit</label>
-        <input id=\"limitInput\" type=\"number\" value=\"200\" min=\"10\" max=\"2000\" />
-        <button id=\"reloadBtn\">새로고침</button>
-      </div>
-    </div>
-
-    <div class=\"filter-grid\">
-      <label class=\"filter-item\">검색어
-        <input id=\"searchInput\" type=\"text\" placeholder=\"이름/모듈/경로/관계\" />
-      </label>
-      <label class=\"filter-item\">객체명
-        <input id=\"objectInput\" type=\"text\" placeholder=\"예: w_main\" />
-      </label>
-      <label class=\"filter-item\">테이블명
-        <input id=\"tableInput\" type=\"text\" placeholder=\"예: TB_ORDER\" />
-      </label>
-      <label class=\"filter-item\">관계 타입
-        <select id=\"relationSelect\">
-          <option value=\"\">(전체)</option>
-          <option value=\"calls\">calls</option>
-          <option value=\"opens\">opens</option>
-          <option value=\"uses_dw\">uses_dw</option>
-          <option value=\"reads_table\">reads_table</option>
-          <option value=\"writes_table\">writes_table</option>
-          <option value=\"triggers_event\">triggers_event</option>
-        </select>
-      </label>
-      <div class=\"controls\" style=\"align-items:flex-end;\">
-        <button id=\"applyFilterBtn\">필터 적용</button>
-        <button id=\"clearFilterBtn\" class=\"btn-subtle\">필터 초기화</button>
+      <div class="header-controls">
+        <label for="runSelect">run_id</label>
+        <select id="runSelect"></select>
+        <label for="limitInput">limit</label>
+        <input id="limitInput" type="number" value="200" min="10" max="2000" style="width:80px"/>
+        <button id="reloadBtn">새로고침</button>
       </div>
     </div>
 
-    <div id=\"status\">loading...</div>
-
-    <div class=\"grid\" id=\"summaryGrid\"></div>
-
-    <div class=\"two-col\">
-      <div class=\"panel\">
-        <h2>Relation Breakdown</h2>
-        <div id=\"relationPills\"></div>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-toggle" id="filterToggle">
+        <span>필터</span>
+        <span class="arrow" id="filterArrow">&#9660;</span>
       </div>
-      <div class=\"panel\">
-        <h2>Run Info</h2>
-        <div id=\"runInfo\"></div>
+      <div id="activeFilters" class="active-filters"></div>
+      <div class="filter-content" id="filterContent">
+        <div class="filter-grid">
+          <div class="filter-item">
+            <label>검색어</label>
+            <input id="searchInput" type="text" placeholder="이름/모듈/경로" />
+          </div>
+          <div class="filter-item">
+            <label>객체명</label>
+            <input id="objectInput" type="text" placeholder="예: w_main" />
+          </div>
+          <div class="filter-item">
+            <label>테이블명</label>
+            <input id="tableInput" type="text" placeholder="예: TB_ORDER" />
+          </div>
+          <div class="filter-item">
+            <label>관계 타입</label>
+            <select id="relationSelect">
+              <option value="">(전체)</option>
+              <option value="calls">calls</option>
+              <option value="opens">opens</option>
+              <option value="uses_dw">uses_dw</option>
+              <option value="reads_table">reads_table</option>
+              <option value="writes_table">writes_table</option>
+              <option value="triggers_event">triggers_event</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button id="applyFilterBtn">적용</button>
+            <button id="clearFilterBtn" class="btn-subtle">초기화</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class=\"panel\">
-      <h2>화면 이동/호출 그래프 시각화</h2>
-      <div class=\"legend\">
-        <span class=\"legend-item\"><span class=\"legend-line calls\"></span>calls</span>
-        <span class=\"legend-item\"><span class=\"legend-line opens\"></span>opens</span>
+    <!-- Status -->
+    <div id="status">loading...</div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn active" data-tab="overview">개요</button>
+      <button class="tab-btn" data-tab="dependencies">의존관계</button>
+      <button class="tab-btn" data-tab="table-impact">테이블 영향도</button>
+      <button class="tab-btn" data-tab="inventory">인벤토리</button>
+    </div>
+
+    <!-- Tab: 개요 -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="metric-grid" id="metricGrid"></div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header"><h2 class="panel-title">관계 분포</h2></div>
+          <div id="relationBar" class="bar-chart"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2 class="panel-title">Run 정보</h2></div>
+          <dl id="runInfo" class="run-info"></dl>
+        </div>
       </div>
-      <svg id=\"graphSvg\" viewBox=\"0 0 1000 460\" role=\"img\"></svg>
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">의존관계 미리보기</h2>
+          <button class="btn-subtle btn-icon" id="goFullGraphBtn">전체 보기 &#8594;</button>
+        </div>
+        <div class="graph-legend">
+          <span class="legend-item"><span class="legend-line" style="background:var(--calls)"></span>calls</span>
+          <span class="legend-item"><span class="legend-line" style="background:var(--opens)"></span>opens</span>
+        </div>
+        <div class="graph-container mini" id="miniGraphContainer">
+          <svg id="miniGraphSvg"></svg>
+        </div>
+      </div>
     </div>
 
-    <div class=\"panel\">
-      <h2>화면 인벤토리</h2>
-      <div class=\"table-wrap\" id=\"inventoryTable\"></div>
+    <!-- Tab: 의존관계 -->
+    <div class="tab-content" id="tab-dependencies">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">화면 이동/호출 그래프</h2>
+          <div class="panel-actions">
+            <div class="toggle-group" id="graphFilter">
+              <button class="toggle-btn active" data-filter="all">전체</button>
+              <button class="toggle-btn" data-filter="calls">calls</button>
+              <button class="toggle-btn" data-filter="opens">opens</button>
+            </div>
+          </div>
+        </div>
+        <div class="graph-legend">
+          <span class="legend-item"><span class="legend-line" style="background:var(--calls)"></span>calls</span>
+          <span class="legend-item"><span class="legend-line" style="background:var(--opens)"></span>opens</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>노드 (크기=연결수)</span>
+        </div>
+        <div class="graph-container full" id="fullGraphContainer">
+          <svg id="fullGraphSvg"></svg>
+          <div class="graph-tooltip" id="graphTooltip"></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header"><h2 class="panel-title">이벤트-함수 맵</h2></div>
+          <div class="table-wrap" id="eventMapTable"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2 class="panel-title">호출 엣지</h2></div>
+          <div class="table-wrap" id="graphEdgeTable"></div>
+        </div>
+      </div>
     </div>
 
-    <div class=\"panel\">
-      <h2>이벤트-함수 맵</h2>
-      <div class=\"table-wrap\" id=\"eventMapTable\"></div>
+    <!-- Tab: 테이블 영향도 -->
+    <div class="tab-content" id="tab-table-impact">
+      <div class="three-col" id="tableImpactSummary"></div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">테이블 영향도 상세</h2>
+          <div class="panel-actions">
+            <div class="toggle-group" id="rwFilter">
+              <button class="toggle-btn active" data-filter="all">ALL</button>
+              <button class="toggle-btn" data-filter="READ">READ</button>
+              <button class="toggle-btn" data-filter="WRITE">WRITE</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap" id="tableImpactDetail"></div>
+      </div>
     </div>
 
-    <div class=\"panel\">
-      <h2>테이블 영향도</h2>
-      <div class=\"table-wrap\" id=\"tableImpactTable\"></div>
-    </div>
-
-    <div class=\"panel\">
-      <h2>화면 이동/호출 그래프(Edge)</h2>
-      <div class=\"table-wrap\" id=\"graphTable\"></div>
-    </div>
-
-    <div class=\"panel\">
-      <h2>미사용 객체 후보</h2>
-      <div class=\"table-wrap\" id=\"unusedTable\"></div>
+    <!-- Tab: 인벤토리 -->
+    <div class="tab-content" id="tab-inventory">
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">객체 타입별 분포</h2></div>
+        <div id="typeDist" class="type-dist"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">화면 인벤토리</h2></div>
+        <div class="table-wrap" id="inventoryTable"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">미사용 객체 후보</h2>
+          <span class="badge badge-count" id="unusedCount">0</span>
+        </div>
+        <div class="table-wrap" id="unusedTable"></div>
+      </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script>
-    const statusEl = document.getElementById('status');
-    const runSelectEl = document.getElementById('runSelect');
-    const limitInputEl = document.getElementById('limitInput');
-    const reloadBtn = document.getElementById('reloadBtn');
-    const applyFilterBtn = document.getElementById('applyFilterBtn');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
-    const searchInputEl = document.getElementById('searchInput');
-    const objectInputEl = document.getElementById('objectInput');
-    const tableInputEl = document.getElementById('tableInput');
-    const relationSelectEl = document.getElementById('relationSelect');
+    /* ===== State ===== */
+    var currentData = null;
+    var currentGraphFilter = 'all';
+    var currentRwFilter = 'all';
+    var fullSimulation = null;
 
-    function escapeHtml(value) {
-      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    /* ===== DOM Refs ===== */
+    var statusEl = document.getElementById('status');
+    var runSelectEl = document.getElementById('runSelect');
+    var limitInputEl = document.getElementById('limitInput');
+    var searchInputEl = document.getElementById('searchInput');
+    var objectInputEl = document.getElementById('objectInput');
+    var tableInputEl = document.getElementById('tableInput');
+    var relationSelectEl = document.getElementById('relationSelect');
+
+    /* ===== Utilities ===== */
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+    function fmt(n) { return Number(n || 0).toLocaleString(); }
 
     function readFilters() {
       return {
         search: searchInputEl.value.trim(),
         object_name: objectInputEl.value.trim(),
         table_name: tableInputEl.value.trim(),
-        relation_type: relationSelectEl.value.trim(),
+        relation_type: relationSelectEl.value.trim()
       };
     }
 
@@ -1120,241 +1408,579 @@ def _render_dashboard_html() -> str:
       objectInputEl.value = '';
       tableInputEl.value = '';
       relationSelectEl.value = '';
+      renderActiveFilters({});
     }
+
+    function handleErr(e) { statusEl.textContent = 'error: ' + e.message; }
 
     async function fetchJson(url) {
-      const response = await fetch(url);
-      if (!response.ok) {
-        const fallback = `request failed (${response.status})`;
-        let body = null;
-        try { body = await response.json(); } catch (_) {}
-        throw new Error((body && body.error) ? body.error : fallback);
+      var r = await fetch(url);
+      if (!r.ok) {
+        var body = null;
+        try { body = await r.json(); } catch(_) {}
+        throw new Error((body && body.error) || 'request failed (' + r.status + ')');
       }
-      return await response.json();
+      return r.json();
     }
 
-    function renderTable(containerId, rows) {
-      const container = document.getElementById(containerId);
-      if (!rows || rows.length === 0) {
-        container.innerHTML = '<div class="sub">데이터 없음</div>';
+    function badgeHtml(type, label) {
+      return '<span class="badge badge-' + esc(type).replace(/ +/g,'_') + '">' + esc(label || type) + '</span>';
+    }
+
+    /* ===== Filter Bar ===== */
+    var filterToggle = document.getElementById('filterToggle');
+    var filterContent = document.getElementById('filterContent');
+    var filterArrow = document.getElementById('filterArrow');
+    filterToggle.addEventListener('click', function() {
+      filterContent.classList.toggle('open');
+      filterArrow.classList.toggle('open');
+    });
+
+    function renderActiveFilters(filters) {
+      var c = document.getElementById('activeFilters');
+      var tags = [];
+      for (var k in filters) {
+        if (filters[k]) {
+          tags.push('<span class="filter-tag">' + esc(k) + '=' + esc(filters[k]) +
+            ' <span class="remove" data-fkey="' + esc(k) + '">&times;</span></span>');
+        }
+      }
+      c.innerHTML = tags.join('');
+    }
+
+    document.getElementById('activeFilters').addEventListener('click', function(e) {
+      var rm = e.target.closest('.remove');
+      if (!rm) return;
+      var key = rm.getAttribute('data-fkey');
+      var map = {search: searchInputEl, object_name: objectInputEl,
+                 table_name: tableInputEl, relation_type: relationSelectEl};
+      if (map[key]) map[key].value = '';
+      loadDashboard().catch(handleErr);
+    });
+
+    /* ===== Tab Navigation ===== */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+      });
+      document.querySelectorAll('.tab-content').forEach(function(c) {
+        c.classList.toggle('active', c.id === 'tab-' + tabId);
+      });
+      if (tabId === 'dependencies' && currentData) renderFullGraph(currentData.graph_data);
+      if (tabId === 'overview' && currentData) renderMiniGraph(currentData.graph_data);
+    }
+
+    document.getElementById('tabBar').addEventListener('click', function(e) {
+      var btn = e.target.closest('.tab-btn');
+      if (btn) switchTab(btn.getAttribute('data-tab'));
+    });
+
+    document.getElementById('goFullGraphBtn').addEventListener('click', function() {
+      switchTab('dependencies');
+    });
+
+    /* Cross-tab navigation: click object name -> dependencies tab with filter */
+    function navToObject(name) {
+      objectInputEl.value = name;
+      loadDashboard().then(function() { switchTab('dependencies'); }).catch(handleErr);
+    }
+
+    /* Event delegation for clickable elements */
+    document.addEventListener('click', function(e) {
+      var el = e.target.closest('[data-nav]');
+      if (el) navToObject(el.getAttribute('data-nav'));
+    });
+
+    /* ===== Sortable Table Renderer ===== */
+    function renderSortableTable(containerId, rows, columns) {
+      var container = document.getElementById(containerId);
+      if (!rows || !rows.length) {
+        container.innerHTML = '<div class="empty-state"><div class="msg">데이터 없음</div></div>';
         return;
       }
+      var sortCol = null, sortAsc = true;
 
-      const headers = Object.keys(rows[0]);
-      const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
-      const bodyRows = rows.map(row => {
-        const cells = headers.map(h => `<td>${escapeHtml(row[h])}</td>`).join('');
-        return `<tr>${cells}</tr>`;
-      }).join('');
-      container.innerHTML = `<table>${thead}<tbody>${bodyRows}</tbody></table>`;
+      function render() {
+        var sorted = rows.slice();
+        if (sortCol !== null) {
+          sorted.sort(function(a, b) {
+            var va = a[sortCol], vb = b[sortCol];
+            if (va == null) va = '';
+            if (vb == null) vb = '';
+            var cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+            return sortAsc ? cmp : -cmp;
+          });
+        }
+        var ths = columns.map(function(c) {
+          var icon = sortCol === c.key ? (sortAsc ? '&#9650;' : '&#9660;') : '&#8597;';
+          var cls = sortCol === c.key ? 'sorted' : '';
+          return '<th class="' + cls + '" data-col="' + esc(c.key) + '">' +
+                 esc(c.label) + ' <span class="sort-icon">' + icon + '</span></th>';
+        }).join('');
+        var trs = sorted.map(function(row) {
+          var tds = columns.map(function(c) {
+            var val = row[c.key];
+            if (c.render) return '<td>' + c.render(val, row) + '</td>';
+            return '<td>' + esc(val) + '</td>';
+          }).join('');
+          return '<tr>' + tds + '</tr>';
+        }).join('');
+        container.innerHTML = '<table><thead><tr>' + ths + '</tr></thead><tbody>' + trs + '</tbody></table>';
+        container.querySelectorAll('th').forEach(function(th) {
+          th.addEventListener('click', function() {
+            var col = th.getAttribute('data-col');
+            if (sortCol === col) sortAsc = !sortAsc;
+            else { sortCol = col; sortAsc = true; }
+            render();
+          });
+        });
+      }
+      render();
     }
 
-    function renderSummary(summary) {
-      const pairs = [
-        ['App Objects', summary.app_objects],
-        ['Table Objects', summary.table_objects],
-        ['Relations', summary.relations],
-        ['SQL Statements', summary.sql_statements],
-        ['SQL Tables', summary.sql_tables],
+    /* ===== Overview Tab ===== */
+    function renderMetrics(summary, unusedCount) {
+      var cards = [
+        {label:'App Objects', value:summary.app_objects, color:'', sub:'애플리케이션 객체'},
+        {label:'Table Objects', value:summary.table_objects, color:'green', sub:'DB 테이블'},
+        {label:'Relations', value:summary.relations, color:'blue', sub:'관계 연결'},
+        {label:'SQL Statements', value:summary.sql_statements, color:'violet', sub:'SQL 문'},
+        {label:'SQL Tables', value:summary.sql_tables, color:'amber', sub:'참조 테이블'},
+        {label:'Unused', value:unusedCount, color:'gray', sub:'미사용 후보'}
       ];
-
-      document.getElementById('summaryGrid').innerHTML = pairs.map(([label, value]) => (
-        `<div class="card"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div></div>`
-      )).join('');
+      document.getElementById('metricGrid').innerHTML = cards.map(function(c) {
+        return '<div class="metric-card ' + c.color + '">' +
+          '<div class="metric-label">' + esc(c.label) + '</div>' +
+          '<div class="metric-value">' + fmt(c.value) + '</div>' +
+          '<div class="metric-sub">' + esc(c.sub) + '</div></div>';
+      }).join('');
     }
 
-    function renderRelationPills(items) {
-      const container = document.getElementById('relationPills');
-      if (!items || items.length === 0) {
-        container.innerHTML = '<div class="sub">데이터 없음</div>';
+    function renderRelationBar(counts) {
+      var el = document.getElementById('relationBar');
+      if (!counts || !counts.length) {
+        el.innerHTML = '<div class="empty-state"><div class="msg">데이터 없음</div></div>';
         return;
       }
-      container.innerHTML = items.map(item => (
-        `<span class="pill">${escapeHtml(item.relation_type)}: ${escapeHtml(item.count)}</span>`
-      )).join('');
+      var max = Math.max.apply(null, counts.map(function(c) { return c.count; }).concat([1]));
+      el.innerHTML = counts.map(function(c) {
+        var pct = (c.count / max * 100).toFixed(1);
+        return '<div class="bar-row">' +
+          '<span class="bar-label">' + esc(c.relation_type) + '</span>' +
+          '<div class="bar-track"><div class="bar-fill ' + c.relation_type + '" style="width:' + pct + '%"></div></div>' +
+          '<span class="bar-count">' + fmt(c.count) + '</span></div>';
+      }).join('');
     }
 
     function renderRunInfo(run) {
-      const container = document.getElementById('runInfo');
-      if (!run) {
-        container.innerHTML = '<div class="sub">데이터 없음</div>';
-        return;
-      }
-      container.innerHTML = `
-        <div><strong>run_id:</strong> ${escapeHtml(run.run_id)}</div>
-        <div><strong>status:</strong> ${escapeHtml(run.status)}</div>
-        <div><strong>started_at:</strong> ${escapeHtml(run.started_at || '-')}</div>
-        <div><strong>finished_at:</strong> ${escapeHtml(run.finished_at || '-')}</div>
-        <div><strong>source_version:</strong> ${escapeHtml(run.source_version || '-')}</div>
-      `;
+      var el = document.getElementById('runInfo');
+      if (!run) { el.innerHTML = '<div class="empty-state"><div class="msg">데이터 없음</div></div>'; return; }
+      el.innerHTML =
+        '<dt>Run ID</dt><dd class="mono">' + esc(run.run_id) + '</dd>' +
+        '<dt>Status</dt><dd>' + esc(run.status) + '</dd>' +
+        '<dt>Started</dt><dd>' + esc(run.started_at || '-') + '</dd>' +
+        '<dt>Finished</dt><dd>' + esc(run.finished_at || '-') + '</dd>' +
+        '<dt>Source Version</dt><dd class="mono">' + esc(run.source_version || '-') + '</dd>';
     }
 
-    function buildGraphLayout(graphData) {
-      const nodes = graphData.nodes || [];
-      const edges = graphData.edges || [];
-      const width = 1000;
-      const height = 460;
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radius = Math.max(120, Math.min(width, height) / 2 - 70);
+    /* ===== Mini Graph (Overview) ===== */
+    function renderMiniGraph(graphData) {
+      var svg = d3.select('#miniGraphSvg');
+      svg.selectAll('*').remove();
+      if (!graphData || !graphData.nodes || !graphData.nodes.length) {
+        svg.append('text').attr('x',20).attr('y',30).attr('fill','#94a3b8').attr('font-size',13).text('그래프 데이터 없음');
+        return;
+      }
+      var topNodes = graphData.nodes.slice().sort(function(a,b) { return (b.degree||0)-(a.degree||0); }).slice(0,20);
+      var nodeSet = {};
+      topNodes.forEach(function(n) { nodeSet[n.id] = true; });
+      var edges = graphData.edges.filter(function(e) { return nodeSet[e.src] && nodeSet[e.dst]; });
 
-      const positionedNodes = nodes.map((node, index) => {
-        const angle = (Math.PI * 2 * index) / Math.max(nodes.length, 1);
-        return {
-          ...node,
-          x: centerX + radius * Math.cos(angle),
-          y: centerY + radius * Math.sin(angle),
-        };
+      var container = document.getElementById('miniGraphContainer');
+      var width = container.clientWidth || 600;
+      var height = 280;
+      svg.attr('viewBox', '0 0 ' + width + ' ' + height);
+
+      var defs = svg.append('defs');
+      ['calls','opens'].forEach(function(t) {
+        defs.append('marker').attr('id','mini-arrow-'+t)
+          .attr('viewBox','0 0 10 10').attr('refX',20).attr('refY',5)
+          .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+          .append('path').attr('d','M 0 0 L 10 5 L 0 10 z')
+          .attr('fill', t === 'calls' ? '#3b82f6' : '#f59e0b');
       });
 
-      const nodePos = new Map(positionedNodes.map(node => [node.id, node]));
-      const positionedEdges = edges.map(edge => ({
-        ...edge,
-        srcNode: nodePos.get(edge.src),
-        dstNode: nodePos.get(edge.dst),
-      })).filter(edge => edge.srcNode && edge.dstNode);
+      var nodes = topNodes.map(function(n) { return Object.assign({}, n); });
+      var links = edges.map(function(e) { return {source:e.src, target:e.dst, type:e.relation_type}; });
 
-      return { width, height, nodes: positionedNodes, edges: positionedEdges };
+      var sim = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(function(d){return d.id;}).distance(60))
+        .force('charge', d3.forceManyBody().strength(-120))
+        .force('center', d3.forceCenter(width/2, height/2))
+        .force('collision', d3.forceCollide().radius(function(d){return 8+Math.min(10,d.degree||0)+5;}))
+        .stop();
+      for (var i=0; i<150; i++) sim.tick();
+      nodes.forEach(function(n) {
+        n.x = Math.max(30, Math.min(width-30, n.x));
+        n.y = Math.max(30, Math.min(height-30, n.y));
+      });
+
+      svg.selectAll('line.edge').data(links).join('line').attr('class','edge')
+        .attr('x1',function(d){return d.source.x;}).attr('y1',function(d){return d.source.y;})
+        .attr('x2',function(d){return d.target.x;}).attr('y2',function(d){return d.target.y;})
+        .attr('stroke',function(d){return d.type==='opens'?'#f59e0b':'#3b82f6';})
+        .attr('stroke-width',1.5).attr('stroke-opacity',0.5)
+        .attr('marker-end',function(d){return 'url(#mini-arrow-'+d.type+')';});
+
+      var g = svg.selectAll('g.node').data(nodes).join('g').attr('class','node')
+        .attr('transform',function(d){return 'translate('+d.x+','+d.y+')';});
+      g.append('circle')
+        .attr('r',function(d){return 4+Math.min(8,(d.degree||0)*0.8);})
+        .attr('fill','#0d9488').attr('fill-opacity',0.85).attr('stroke','#115e59').attr('stroke-width',1);
+      g.append('text').text(function(d){return d.name;})
+        .attr('y',function(d){return -(6+Math.min(8,(d.degree||0)*0.8));})
+        .attr('text-anchor','middle').attr('font-size',9).attr('fill','#475569');
     }
 
-    function renderGraph(graphData) {
-      const svg = document.getElementById('graphSvg');
-      const { width, height, nodes, edges } = buildGraphLayout(graphData || { nodes: [], edges: [] });
+    /* ===== Full Interactive Graph (Dependencies) ===== */
+    function renderFullGraph(graphData) {
+      var svgEl = document.getElementById('fullGraphSvg');
+      var svg = d3.select(svgEl);
+      svg.selectAll('*').remove();
+      if (fullSimulation) { fullSimulation.stop(); fullSimulation = null; }
 
-      if (!nodes.length || !edges.length) {
-        svg.innerHTML = `<text x="20" y="30" fill="#6b7280" font-size="14">그래프 데이터가 없습니다.</text>`;
-        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      if (!graphData || !graphData.nodes || !graphData.nodes.length) {
+        svg.append('text').attr('x',20).attr('y',30).attr('fill','#94a3b8').attr('font-size',13).text('그래프 데이터 없음');
         return;
       }
 
-      const defs = `
-        <defs>
-          <marker id="arrow-call" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <polygon points="0 0, 7 3.5, 0 7" fill="#0ea5e9"></polygon>
-          </marker>
-          <marker id="arrow-open" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <polygon points="0 0, 7 3.5, 0 7" fill="#f59e0b"></polygon>
-          </marker>
-        </defs>
-      `;
+      var container = document.getElementById('fullGraphContainer');
+      var width = container.clientWidth || 900;
+      var height = parseInt(getComputedStyle(svgEl).height) || 550;
 
-      const edgeSvg = edges.map(edge => {
-        const color = edge.relation_type === 'opens' ? '#f59e0b' : '#0ea5e9';
-        const marker = edge.relation_type === 'opens' ? 'url(#arrow-open)' : 'url(#arrow-call)';
-        return `
-          <line
-            x1="${edge.srcNode.x}" y1="${edge.srcNode.y}"
-            x2="${edge.dstNode.x}" y2="${edge.dstNode.y}"
-            stroke="${color}" stroke-width="2" stroke-opacity="0.75"
-            marker-end="${marker}">
-            <title>${escapeHtml(edge.src)} -> ${escapeHtml(edge.dst)} (${escapeHtml(edge.relation_type)})</title>
-          </line>
-        `;
-      }).join('');
+      var filteredEdges = graphData.edges;
+      if (currentGraphFilter !== 'all') {
+        filteredEdges = graphData.edges.filter(function(e) { return e.relation_type === currentGraphFilter; });
+      }
+      var nodeIds = {};
+      filteredEdges.forEach(function(e) { nodeIds[e.src] = true; nodeIds[e.dst] = true; });
+      var filteredNodes = graphData.nodes.filter(function(n) { return nodeIds[n.id]; });
 
-      const nodeSvg = nodes.map(node => {
-        const r = 10 + Math.min(10, Number(node.degree || 0));
-        return `
-          <g>
-            <circle cx="${node.x}" cy="${node.y}" r="${r}" fill="#0f766e" fill-opacity="0.9" stroke="#0b4f49" stroke-width="1.5">
-              <title>${escapeHtml(node.name)} (in=${escapeHtml(node.in_degree)} out=${escapeHtml(node.out_degree)})</title>
-            </circle>
-            <text x="${node.x}" y="${node.y - r - 6}" text-anchor="middle" fill="#374151" font-size="11">
-              ${escapeHtml(node.name)}
-            </text>
-          </g>
-        `;
-      }).join('');
+      if (!filteredNodes.length) {
+        svg.append('text').attr('x',20).attr('y',30).attr('fill','#94a3b8').attr('font-size',13).text('선택된 관계 타입의 데이터 없음');
+        return;
+      }
 
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-      svg.innerHTML = defs + edgeSvg + nodeSvg;
+      svg.attr('viewBox', '0 0 ' + width + ' ' + height);
+
+      var defs = svg.append('defs');
+      ['calls','opens'].forEach(function(t) {
+        defs.append('marker').attr('id','full-arrow-'+t)
+          .attr('viewBox','0 0 10 10').attr('refX',20).attr('refY',5)
+          .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+          .append('path').attr('d','M 0 0 L 10 5 L 0 10 z')
+          .attr('fill', t==='calls'?'#3b82f6':'#f59e0b');
+      });
+
+      var nodes = filteredNodes.map(function(n) { return Object.assign({}, n); });
+      var links = filteredEdges.map(function(e) {
+        return {source:e.src, target:e.dst, type:e.relation_type, confidence:e.confidence};
+      });
+
+      var gRoot = svg.append('g');
+      var zoom = d3.zoom().scaleExtent([0.3, 5]).on('zoom', function(event) {
+        gRoot.attr('transform', event.transform);
+      });
+      svg.call(zoom);
+
+      var linkSel = gRoot.selectAll('line.edge').data(links).join('line').attr('class','edge')
+        .attr('stroke',function(d){return d.type==='opens'?'#f59e0b':'#3b82f6';})
+        .attr('stroke-width',1.5).attr('stroke-opacity',0.4)
+        .attr('marker-end',function(d){return 'url(#full-arrow-'+d.type+')';});
+
+      var nodeSel = gRoot.selectAll('g.node').data(nodes).join('g').attr('class','node').style('cursor','pointer');
+      var circles = nodeSel.append('circle')
+        .attr('r',function(d){return 6+Math.min(14,(d.degree||0)*0.7);})
+        .attr('fill','#0d9488').attr('fill-opacity',0.85).attr('stroke','#115e59').attr('stroke-width',1.5);
+      var labels = nodeSel.append('text').text(function(d){return d.name;})
+        .attr('dy',function(d){return -(8+Math.min(14,(d.degree||0)*0.7));})
+        .attr('text-anchor','middle').attr('font-size',10).attr('fill','#475569').attr('pointer-events','none');
+
+      var tooltip = document.getElementById('graphTooltip');
+
+      nodeSel.on('mouseenter', function(event, d) {
+        tooltip.innerHTML = '<strong>' + esc(d.name) + '</strong><br>In: ' + d.in_degree + ' / Out: ' + d.out_degree + ' / Total: ' + d.degree;
+        tooltip.classList.add('visible');
+        var rect = container.getBoundingClientRect();
+        tooltip.style.left = (event.clientX - rect.left + 12) + 'px';
+        tooltip.style.top = (event.clientY - rect.top - 10) + 'px';
+        var connected = {};
+        connected[d.id] = true;
+        links.forEach(function(l) {
+          var sId = typeof l.source === 'object' ? l.source.id : l.source;
+          var tId = typeof l.target === 'object' ? l.target.id : l.target;
+          if (sId === d.id) connected[tId] = true;
+          if (tId === d.id) connected[sId] = true;
+        });
+        circles.attr('fill-opacity', function(n) { return connected[n.id] ? 1 : 0.15; });
+        linkSel.attr('stroke-opacity', function(l) {
+          var sId = typeof l.source === 'object' ? l.source.id : l.source;
+          var tId = typeof l.target === 'object' ? l.target.id : l.target;
+          return (sId === d.id || tId === d.id) ? 0.8 : 0.05;
+        });
+        labels.attr('fill-opacity', function(n) { return connected[n.id] ? 1 : 0.15; });
+      }).on('mouseleave', function() {
+        tooltip.classList.remove('visible');
+        circles.attr('fill-opacity', 0.85);
+        linkSel.attr('stroke-opacity', 0.4);
+        labels.attr('fill-opacity', 1);
+      }).on('click', function(event, d) {
+        navToObject(d.name);
+      });
+
+      nodeSel.call(d3.drag()
+        .on('start', function(event, d) {
+          if (!event.active) fullSimulation.alphaTarget(0.3).restart();
+          d.fx = d.x; d.fy = d.y;
+        })
+        .on('drag', function(event, d) { d.fx = event.x; d.fy = event.y; })
+        .on('end', function(event, d) {
+          if (!event.active) fullSimulation.alphaTarget(0);
+          d.fx = null; d.fy = null;
+        })
+      );
+
+      fullSimulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(function(d){return d.id;}).distance(70))
+        .force('charge', d3.forceManyBody().strength(-150))
+        .force('center', d3.forceCenter(width/2, height/2))
+        .force('collision', d3.forceCollide().radius(function(d){return 8+Math.min(14,(d.degree||0)*0.7)+4;}))
+        .on('tick', function() {
+          linkSel.attr('x1',function(d){return d.source.x;}).attr('y1',function(d){return d.source.y;})
+                 .attr('x2',function(d){return d.target.x;}).attr('y2',function(d){return d.target.y;});
+          nodeSel.attr('transform',function(d){return 'translate('+d.x+','+d.y+')';});
+        });
     }
 
+    /* Graph filter toggle */
+    document.getElementById('graphFilter').addEventListener('click', function(e) {
+      var btn = e.target.closest('.toggle-btn');
+      if (!btn) return;
+      document.querySelectorAll('#graphFilter .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentGraphFilter = btn.getAttribute('data-filter');
+      if (currentData) renderFullGraph(currentData.graph_data);
+    });
+
+    /* ===== Dependencies Tab Tables ===== */
+    function renderEventMap(data) {
+      renderSortableTable('eventMapTable', data, [
+        {key:'object_name', label:'객체명', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'event_name', label:'이벤트', render: function(v) {
+          return '<span class="mono">'+esc(v)+'</span>';
+        }},
+        {key:'script_ref', label:'스크립트', render: function(v) {
+          return '<span class="mono">'+esc(v)+'</span>';
+        }},
+        {key:'called_objects', label:'호출 대상', render: function(v) {
+          if (!v) return '<span style="color:var(--muted)">-</span>';
+          return v.split(',').map(function(o) {
+            var t = o.trim();
+            return '<span class="clickable" data-nav="'+esc(t)+'">'+esc(t)+'</span>';
+          }).join(', ');
+        }}
+      ]);
+    }
+
+    function renderGraphEdges(data) {
+      renderSortableTable('graphEdgeTable', data, [
+        {key:'src_name', label:'Source', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'dst_name', label:'Target', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'relation_type', label:'관계', render: function(v) { return badgeHtml(v, v); }},
+        {key:'confidence', label:'신뢰도', render: function(v) {
+          return '<span style="font-weight:600">' + ((v||0)*100).toFixed(0) + '%</span>';
+        }}
+      ]);
+    }
+
+    /* ===== Table Impact Tab ===== */
+    function renderTableImpactSummary(data) {
+      var reads = 0, writes = 0, tableSet = {};
+      (data||[]).forEach(function(d) {
+        if (d.rw_type === 'READ') reads++;
+        if (d.rw_type === 'WRITE') writes++;
+        tableSet[d.table_name] = true;
+      });
+      var tables = Object.keys(tableSet).length;
+      var cards = [
+        {label:'READ', value:reads, color:'green'},
+        {label:'WRITE', value:writes, color:'red'},
+        {label:'Tables', value:tables, color:'amber'}
+      ];
+      document.getElementById('tableImpactSummary').innerHTML = cards.map(function(c) {
+        return '<div class="metric-card '+c.color+'">' +
+          '<div class="metric-label">'+esc(c.label)+'</div>' +
+          '<div class="metric-value">'+fmt(c.value)+'</div></div>';
+      }).join('');
+    }
+
+    function renderTableImpactDetail(data) {
+      var filtered = data;
+      if (currentRwFilter !== 'all') {
+        filtered = data.filter(function(d) { return d.rw_type === currentRwFilter; });
+      }
+      renderSortableTable('tableImpactDetail', filtered, [
+        {key:'table_name', label:'테이블', render: function(v) {
+          return '<span class="mono" style="font-weight:600">'+esc(v)+'</span>';
+        }},
+        {key:'rw_type', label:'R/W', render: function(v) {
+          return badgeHtml(v.toLowerCase(), v);
+        }},
+        {key:'owner_object', label:'참조 객체', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'sql_kind', label:'SQL 종류', render: function(v) {
+          return '<span class="mono">'+esc(v)+'</span>';
+        }}
+      ]);
+    }
+
+    /* RW filter toggle */
+    document.getElementById('rwFilter').addEventListener('click', function(e) {
+      var btn = e.target.closest('.toggle-btn');
+      if (!btn) return;
+      document.querySelectorAll('#rwFilter .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentRwFilter = btn.getAttribute('data-filter');
+      if (currentData) renderTableImpactDetail(currentData.table_impact);
+    });
+
+    /* ===== Inventory Tab ===== */
+    function renderTypeDist(data) {
+      var counts = {};
+      (data||[]).forEach(function(d) { counts[d.type] = (counts[d.type]||0) + 1; });
+      var el = document.getElementById('typeDist');
+      var sorted = Object.entries(counts).sort(function(a,b) { return b[1]-a[1]; });
+      if (!sorted.length) {
+        el.innerHTML = '<div class="empty-state"><div class="msg">데이터 없음</div></div>';
+        return;
+      }
+      el.innerHTML = sorted.map(function(e) {
+        return '<div class="type-chip">' + badgeHtml('type', e[0]) +
+          ' <span class="count">' + fmt(e[1]) + '</span></div>';
+      }).join('');
+    }
+
+    function renderInventory(data) {
+      renderSortableTable('inventoryTable', data, [
+        {key:'type', label:'타입', render: function(v) { return badgeHtml('type', v); }},
+        {key:'name', label:'객체명', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'module', label:'모듈', render: function(v) {
+          return '<span class="mono">'+esc(v||'-')+'</span>';
+        }},
+        {key:'source_path', label:'경로', render: function(v) {
+          return '<span class="mono" style="color:var(--text-secondary)">'+esc(v||'-')+'</span>';
+        }}
+      ]);
+    }
+
+    function renderUnused(data) {
+      document.getElementById('unusedCount').textContent = fmt(data.length);
+      renderSortableTable('unusedTable', data, [
+        {key:'type', label:'타입', render: function(v) { return badgeHtml('type', v); }},
+        {key:'name', label:'객체명', render: function(v) {
+          return '<span class="clickable" data-nav="'+esc(v)+'">'+esc(v)+'</span>';
+        }},
+        {key:'module', label:'모듈', render: function(v) {
+          return '<span class="mono">'+esc(v||'-')+'</span>';
+        }},
+        {key:'source_path', label:'경로', render: function(v) {
+          return '<span class="mono" style="color:var(--text-secondary)">'+esc(v||'-')+'</span>';
+        }}
+      ]);
+    }
+
+    /* ===== Main Data Load ===== */
     async function loadRuns() {
-      const runPayload = await fetchJson('/api/runs');
-      const runs = runPayload.runs || [];
-
-      runSelectEl.innerHTML = runs.map(run => (
-        `<option value="${escapeHtml(run.run_id)}">${escapeHtml(run.run_id)} (${escapeHtml(run.status)})</option>`
-      )).join('');
-
+      var data = await fetchJson('/api/runs');
+      var runs = data.runs || [];
+      runSelectEl.innerHTML = runs.map(function(r) {
+        return '<option value="'+esc(r.run_id)+'">'+esc(r.run_id)+' ('+esc(r.status)+')</option>';
+      }).join('');
       return runs;
     }
 
-    function appendFilters(params, filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          params.set(key, value);
-        }
-      });
-    }
-
     async function loadDashboard() {
-      const selectedRun = runSelectEl.value;
-      const limit = Number(limitInputEl.value || 200);
-      const filters = readFilters();
-
-      const params = new URLSearchParams();
+      var selectedRun = runSelectEl.value;
+      var limit = Number(limitInputEl.value || 200);
+      var filters = readFilters();
+      var params = new URLSearchParams();
       if (selectedRun) params.set('run_id', selectedRun);
       params.set('limit', String(limit));
-      appendFilters(params, filters);
+      for (var k in filters) { if (filters[k]) params.set(k, filters[k]); }
 
       statusEl.textContent = 'loading...';
-      const payload = await fetchJson(`/api/all?${params.toString()}`);
+      var payload = await fetchJson('/api/all?' + params.toString());
+      currentData = payload;
 
-      renderSummary(payload.summary || {});
-      renderRelationPills(payload.relation_counts || []);
+      renderActiveFilters(payload.filters || {});
+
+      /* Overview */
+      renderMetrics(payload.summary || {}, (payload.unused_object_candidates || []).length);
+      renderRelationBar(payload.relation_counts || []);
       renderRunInfo(payload.run || null);
-      renderGraph(payload.graph_data || { nodes: [], edges: [] });
-      renderTable('inventoryTable', payload.screen_inventory || []);
-      renderTable('eventMapTable', payload.event_function_map || []);
-      renderTable('tableImpactTable', payload.table_impact || []);
-      renderTable('graphTable', payload.screen_call_graph || []);
-      renderTable('unusedTable', payload.unused_object_candidates || []);
+      renderMiniGraph(payload.graph_data);
 
-      const filterText = Object.entries(payload.filters || {})
-        .filter(([, value]) => value)
-        .map(([key, value]) => `${key}=${value}`)
-        .join(', ');
-      const suffix = filterText ? ` | filters: ${filterText}` : '';
-      statusEl.textContent = `run_id=${payload.run.run_id} | rows_limit=${payload.limit}${suffix}`;
+      /* Dependencies */
+      renderEventMap(payload.event_function_map || []);
+      renderGraphEdges(payload.screen_call_graph || []);
+
+      /* Table Impact */
+      renderTableImpactSummary(payload.table_impact || []);
+      renderTableImpactDetail(payload.table_impact || []);
+
+      /* Inventory */
+      renderTypeDist(payload.screen_inventory || []);
+      renderInventory(payload.screen_inventory || []);
+      renderUnused(payload.unused_object_candidates || []);
+
+      /* Render full graph only if dependencies tab is active */
+      var depTab = document.getElementById('tab-dependencies');
+      if (depTab.classList.contains('active')) renderFullGraph(payload.graph_data);
+
+      /* Status */
+      var parts = [];
+      var f = payload.filters || {};
+      for (var fk in f) { if (f[fk]) parts.push(fk + '=' + f[fk]); }
+      var suffix = parts.length ? ' | filters: ' + parts.join(', ') : '';
+      statusEl.textContent = 'run_id=' + payload.run.run_id + ' | limit=' + payload.limit + suffix;
     }
 
     async function boot() {
       try {
-        const runs = await loadRuns();
-        if (runs.length === 0) {
-          statusEl.textContent = 'No runs found in DB';
-          return;
-        }
+        var runs = await loadRuns();
+        if (!runs.length) { statusEl.textContent = 'No runs found in DB'; return; }
         await loadDashboard();
-      } catch (error) {
-        statusEl.textContent = `error: ${error.message}`;
-      }
+      } catch(e) { handleErr(e); }
     }
 
-    reloadBtn.addEventListener('click', () => {
-      loadDashboard().catch(error => {
-        statusEl.textContent = `error: ${error.message}`;
-      });
-    });
+    /* ===== Event Handlers ===== */
+    document.getElementById('reloadBtn').addEventListener('click', function() { loadDashboard().catch(handleErr); });
+    document.getElementById('applyFilterBtn').addEventListener('click', function() { loadDashboard().catch(handleErr); });
+    document.getElementById('clearFilterBtn').addEventListener('click', function() { clearFilters(); loadDashboard().catch(handleErr); });
+    runSelectEl.addEventListener('change', function() { loadDashboard().catch(handleErr); });
 
-    applyFilterBtn.addEventListener('click', () => {
-      loadDashboard().catch(error => {
-        statusEl.textContent = `error: ${error.message}`;
-      });
-    });
-
-    clearFilterBtn.addEventListener('click', () => {
-      clearFilters();
-      loadDashboard().catch(error => {
-        statusEl.textContent = `error: ${error.message}`;
-      });
-    });
-
-    runSelectEl.addEventListener('change', () => {
-      loadDashboard().catch(error => {
-        statusEl.textContent = `error: ${error.message}`;
+    [searchInputEl, objectInputEl, tableInputEl].forEach(function(el) {
+      el.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter') loadDashboard().catch(handleErr);
       });
     });
 

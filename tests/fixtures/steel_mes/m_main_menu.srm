@@ -1,0 +1,26 @@
+forward
+global type m_main_menu from menu
+end type
+end forward
+
+global type m_main_menu from menu
+end type
+
+on m_main_menu.create
+  call super::create
+end on
+
+event m_prod_result.clicked;
+  // 메뉴: 생산실적
+  open(w_prod_result)
+end event
+
+event m_inventory.clicked;
+  // 메뉴: 재고조회
+  open(w_inventory)
+end event
+
+event m_quality_inspect.clicked;
+  // 메뉴: 품질검사실적
+  open(w_quality_inspect)
+end event

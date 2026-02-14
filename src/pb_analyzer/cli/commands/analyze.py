@@ -32,7 +32,8 @@ def execute(args: argparse.Namespace) -> int:
         f"events={outcome.persist_result.events_count}, "
         f"functions={outcome.persist_result.functions_count}, "
         f"relations={outcome.persist_result.relations_count}, "
-        f"sql={outcome.persist_result.sql_statements_count}"
+        f"sql={outcome.persist_result.sql_statements_count}, "
+        f"data_windows={outcome.persist_result.data_windows_count}"
     )
 
     if outcome.has_partial_failure:

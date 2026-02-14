@@ -8,6 +8,7 @@ from typing import cast
 
 from pb_analyzer.common import (
     AnalysisResult,
+    DataWindowRecord,
     EventRecord,
     FunctionRecord,
     ObjectRecord,
@@ -183,6 +184,18 @@ def analyze(
 
     all_objects = tuple(object_records + sorted(table_objects.values(), key=lambda item: item.name))
 
+    data_windows: list[DataWindowRecord] = []
+    for parsed_object in parse_result.objects:
+        for dw in parsed_object.data_windows:
+            data_windows.append(
+                DataWindowRecord(
+                    object_name=parsed_object.name,
+                    dw_name=dw.dw_name,
+                    base_table=dw.base_table,
+                    sql_select=dw.sql_select,
+                )
+            )
+
     warnings = tuple(
         f"parse issue: {issue.object_name} ({issue.message})"
         for issue in parse_result.issues
@@ -194,6 +207,7 @@ def analyze(
         functions=tuple(functions),
         relations=tuple(relations),
         sql_statements=tuple(sql_statements),
+        data_windows=tuple(data_windows),
         warnings=warnings,
     )
 

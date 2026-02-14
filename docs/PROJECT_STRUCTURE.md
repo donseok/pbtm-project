@@ -14,13 +14,13 @@
 ├── examples/               # 샘플 manifest/명령
 ├── sql/                    # IR 스키마/인덱스 정의
 ├── src/pb_analyzer/        # 애플리케이션 소스
-│   ├── cli/                # CLI 진입점 및 서브커맨드
+│   ├── cli/                # CLI 진입점 및 서브커맨드 (extract, analyze, report, run-all, dashboard, diff)
 │   ├── pipeline/           # 단계 오케스트레이션
 │   ├── extractor/          # ORCA 기반 추출
 │   ├── parser/             # 토크나이징/파싱(fail-soft)
 │   ├── analyzer/           # 관계/SQL/테이블 영향 분석
-│   ├── storage/            # SQLite/PostgreSQL 적재
-│   ├── reporter/           # CSV/JSON/HTML 리포트 생성
+│   ├── storage/            # SQLite 적재, run 간 diff 비교 (differ.py)
+│   ├── reporter/           # CSV/JSON/HTML 리포트 6종 생성 (data_windows 포함)
 │   ├── dashboard/          # 웹 대시보드(API + UI, 검색/필터, 그래프 시각화)
 │   ├── rules/              # 예외/매핑 규칙
 │   ├── observability/      # 로깅/메트릭

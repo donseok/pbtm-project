@@ -1,0 +1,16 @@
+release 12;
+datawindow(units=0 timer_interval=0 color=536870912 processing=0)
+table(column=(type=char(20) updatewhereclause=yes name=lot_no dbname="tb_quality_result.lot_no")
+  column=(type=char(20) updatewhereclause=yes name=inspect_cd dbname="tb_quality_result.inspect_cd")
+  column=(type=char(50) updatewhereclause=yes name=inspect_nm dbname="tb_quality_result.inspect_nm")
+  column=(type=decimal(4) updatewhereclause=yes name=spec_min dbname="tb_quality_result.spec_min")
+  column=(type=decimal(4) updatewhereclause=yes name=spec_max dbname="tb_quality_result.spec_max")
+  column=(type=decimal(4) updatewhereclause=yes name=measure_val_1 dbname="tb_quality_result.measure_val_1")
+  column=(type=decimal(4) updatewhereclause=yes name=measure_val_2 dbname="tb_quality_result.measure_val_2")
+  column=(type=decimal(4) updatewhereclause=yes name=measure_val_3 dbname="tb_quality_result.measure_val_3")
+  column=(type=char(10) updatewhereclause=yes name=judge_cd dbname="tb_quality_result.judge_cd")
+  column=(type=char(10) updatewhereclause=yes name=inspector_id dbname="tb_quality_result.inspector_id")
+  column=(type=char(10) updatewhereclause=yes name=status dbname="tb_quality_result.status")
+  retrieve="SELECT qr.lot_no, qr.inspect_cd, qr.inspect_nm, qr.spec_min, qr.spec_max, qr.measure_val_1, qr.measure_val_2, qr.measure_val_3, qr.judge_cd, qr.inspect_result, qr.inspector_id, qr.status, qr.inspect_dt, qr.remark FROM tb_quality_result qr WHERE qr.lot_no = :as_lot_no ORDER BY qr.inspect_cd"
+  update="tb_quality_result"
+)

@@ -43,6 +43,6 @@ def test_persist_and_report_generation(tmp_path: Path) -> None:
     csv_outcome = generate_reports(db_path=db_path, output_dir=tmp_path / "reports_csv", report_format="csv")
     html_outcome = generate_reports(db_path=db_path, output_dir=tmp_path / "reports_html", report_format="html")
 
-    assert len(json_outcome.generated_files) == 5
-    assert len(csv_outcome.generated_files) == 5
+    assert len(json_outcome.generated_files) == 6
+    assert len(csv_outcome.generated_files) == 6
     assert len(html_outcome.generated_files) == 1

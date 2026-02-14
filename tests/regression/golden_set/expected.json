@@ -1,0 +1,22 @@
+{
+  "description": "골든셋 기대 결과: tests/fixtures/source 기반",
+  "objects": [
+    {"name": "w_main", "type": "Window"},
+    {"name": "w_detail", "type": "Window"},
+    {"name": "dw_order", "type": "DataWindow"}
+  ],
+  "relations": [
+    {"src": "w_main", "dst": "w_detail", "type": "opens"},
+    {"src": "w_main", "dst": "w_main", "type": "triggers_event"},
+    {"src": "w_main", "dst": "TB_ORDER", "type": "reads_table"},
+    {"src": "w_main", "dst": "TB_ORDER_HIST", "type": "writes_table"},
+    {"src": "w_main", "dst": "dw_order", "type": "uses_dw"}
+  ],
+  "data_windows": [
+    {"dw_name": "dw_order", "base_table": "tb_order"}
+  ],
+  "sql_statements": [
+    {"owner": "w_main", "kind": "SELECT"},
+    {"owner": "w_main", "kind": "INSERT"}
+  ]
+}

@@ -134,12 +134,27 @@ def _collect_report_data(conn: sqlite3.Connection) -> ReportData:
         """,
     )
 
+    data_windows = _query(
+        conn,
+        """
+        SELECT
+            o.name AS object_name,
+            dw.dw_name,
+            dw.base_table,
+            dw.sql_select
+        FROM data_windows dw
+        JOIN objects o ON o.id = dw.object_id
+        ORDER BY o.name, dw.dw_name
+        """,
+    )
+
     return {
         "screen_inventory": inventory,
         "event_function_map": event_function_map,
         "table_impact": table_impact,
         "screen_call_graph": graph,
         "unused_object_candidates": unused_candidates,
+        "data_windows": data_windows,
     }
 
 

@@ -26,7 +26,7 @@ def test_cli_build_parser_contains_required_commands() -> None:
     )
     commands = set(subparsers_action.choices.keys())
 
-    assert commands == {"extract", "analyze", "report", "run-all", "dashboard"}
+    assert commands == {"extract", "analyze", "report", "run-all", "dashboard", "diff"}
 
 
 def test_cli_extract_analyze_report_roundtrip(tmp_path: Path) -> None:

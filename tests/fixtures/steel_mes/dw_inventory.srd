@@ -1,0 +1,15 @@
+release 12;
+datawindow(units=0 timer_interval=0 color=536870912 processing=0)
+table(column=(type=char(20) updatewhereclause=yes name=lot_no dbname="tb_inventory.lot_no")
+  column=(type=char(10) updatewhereclause=yes name=plant_cd dbname="tb_inventory.plant_cd")
+  column=(type=char(10) updatewhereclause=yes name=wh_cd dbname="tb_inventory.wh_cd")
+  column=(type=decimal(2) updatewhereclause=yes name=stock_qty dbname="tb_inventory.stock_qty")
+  column=(type=decimal(3) updatewhereclause=yes name=stock_weight dbname="tb_inventory.stock_weight")
+  column=(type=char(10) updatewhereclause=yes name=inv_status dbname="tb_inventory.inv_status")
+  column=(type=char(20) name=prod_cd dbname="pr.prod_cd")
+  column=(type=char(50) name=prod_nm dbname="tp.prod_nm")
+  column=(type=char(20) name=grade_cd dbname="tp.grade_cd")
+  column=(type=char(50) name=wh_nm dbname="tw.wh_nm")
+  retrieve="SELECT inv.lot_no, inv.plant_cd, inv.wh_cd, tw.wh_nm, pr.prod_cd, tp.prod_nm, tp.grade_cd, inv.stock_qty, inv.stock_weight, inv.inv_status FROM tb_inventory inv JOIN tb_prod_result pr ON pr.lot_no = inv.lot_no JOIN tb_product tp ON tp.prod_cd = pr.prod_cd JOIN tb_warehouse tw ON tw.wh_cd = inv.wh_cd WHERE inv.wh_cd = :as_wh_cd AND (:as_prod_cd = '' OR pr.prod_cd = :as_prod_cd) AND inv.stock_qty > 0 ORDER BY inv.lot_no"
+  update="tb_inventory"
+)
